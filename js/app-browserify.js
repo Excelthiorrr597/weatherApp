@@ -23,6 +23,26 @@ console.log('loaded dist file')
 var lat = '29.7672',
     long = '-95.3920'
 
+window.lat = lat
+
+
+function userQuery(event) {
+    if (event.keyCode === 13) {
+        var inputEl = event.target,
+            query = inputEl.value,
+            latLong = query.split(',')
+
+        lat = latLong[0]
+        console.log(lat)
+        long = latLong[1]
+        location.hash = `${lat},${long}`
+        event.target.value = ''
+    }
+}
+
+$('#searchBar')[0].addEventListener('keypress', userQuery)
+
+
 var WeatherModel = Backbone.Model.extend({
 
     url: `https://api.forecast.io/forecast/b79c4066ee5c0ab13cf70ab690dff82f/${lat},${long}`,
@@ -31,14 +51,11 @@ var WeatherModel = Backbone.Model.extend({
     }
 })
 
+var wm = new WeatherModel
+
 var WeatherView = Backbone.View.extend({
 
     el: '#container',
-
-    events: {
-        "keypress input": "userQuery"
-    },
-
 
     getCurrently: function() {
         var currentWeatherObj = this.model.attributes.currently
@@ -53,6 +70,8 @@ var WeatherView = Backbone.View.extend({
         humidity = humidity.toString().slice(2, 4) + '%'
 
         rain = rain.toString().slice(2, 4).replace('0', '') + '%'
+
+        if (rain[0] === '%') rain = '0%'
 
 
 
@@ -71,7 +90,6 @@ var WeatherView = Backbone.View.extend({
 
 
         dailyWeatherArr.forEach(function(dayObj) {
-            console.log(dayObj)
             var tempMax = dayObj.apparentTemperatureMax,
                 tempMin = dayObj.apparentTemperatureMin,
                 humidity = dayObj.humidity,
@@ -84,6 +102,7 @@ var WeatherView = Backbone.View.extend({
 
             humidity = humidity.toString().slice(2, 4) + '%'
             rain = rain.toString().slice(2, 4).replace('0', '') + '%'
+            if (rain[0] === '%') rain = '0%'
 
 
             dayOfWeek = new Date(dayOfWeek * 1000).getDay()
@@ -111,8 +130,6 @@ var WeatherView = Backbone.View.extend({
     },
 
     render: function() {
-        console.log('logging this.model in my render() method')
-        console.log(this.model)
         this.$el.html(
             `<div id="weatherContainer">
 				<div id="currentContainer">
@@ -127,20 +144,6 @@ var WeatherView = Backbone.View.extend({
         )
     },
 
-    userQuery: function(event) {
-        if (event.keyCode === 13) {
-            var inputEl = event.target,
-                query = inputEl.value,
-                latLong = query.split(',')
-            console.log(query)
-            console.log(lat)
-            console.log(long)
-            lat = latLong[0]
-            long = latLong[1]
-            location.hash = `${lat},${long}`
-        }
-    },
-
     initialize: function() {
 
         this.listenTo(this.model, 'change', this.render)
@@ -148,25 +151,30 @@ var WeatherView = Backbone.View.extend({
 
 })
 
+var wv = new WeatherView({model: wm})
+
 var WeatherRouter = Backbone.Router.extend({
 
     routes: {
+        ':query': 'showResults',
         '*anyroute': 'showDefault'
     },
 
     initialize: function() {
-        this.wm = new WeatherModel()
-        this.wv = new WeatherView({
-            model: this.wm
-        })
         Backbone.history.start()
     },
 
     showDefault: function() {
         console.log('running show default')
-        this.wm.fetch({
+        wm.fetch({
             dataType: 'jsonp',
-            processData: true
+        })
+    },
+
+    showResults: function(query){
+        console.log('responding to hash change')
+        wm.fetch({
+            dataType: 'jsonp',
         })
     }
 })
