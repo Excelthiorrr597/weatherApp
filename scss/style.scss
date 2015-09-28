@@ -73,3 +73,110 @@ img {
  * YOUR CODE HERE
  */
 
+body{
+    font-family: palatino;
+    color: slategrey;
+}
+
+#searchContainer{
+    width: 100%;
+    background-color: dodgerblue;
+
+}
+
+#searchBar {
+    margin-left: 50%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+
+h1 {
+    font-size: 2rem;
+    padding: 50px 0px;
+    color: steelblue;
+}
+
+#container {
+    background-color: lightsteelblue;
+}
+
+#weatherContainer {
+    width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    background-color: #c0c0c0;
+
+    div {
+        vertical-align: top;
+        margin: 0 auto;
+    }
+
+}
+
+#currentContainer {
+    width: 100%;
+}
+
+#dailyContainer {
+    width: 100%;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+#currently {
+    width: 90%;
+    margin: 0 auto;
+}
+
+#daily {
+    margin: 0 auto;
+    width: 90%;
+}
+
+#weekDay {
+    font-size: 1.5rem;
+    padding-top: 20px;
+    border-top: solid 1px slategrey;
+}
+
+.weekSummary {
+    font-size: .75rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
