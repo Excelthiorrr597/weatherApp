@@ -20,32 +20,47 @@ console.log('loaded dist file')
 // start app
 // new Router()
 // }
-var lat = '29.7672',
-    long = '-95.3920'
+var lat = "29.7353",
+    long = "-95.3904"
 
-window.lat = lat
+var place = "Houston, TX, USA"
+
+function getLatLong() {
+    var data = navigator.geolocation.getCurrentPosition(function(data){
+    lat = data.coords.latitude
+    long = data.coords.longitude
+    place = "Houston, TX, USA"
+    wm.fetch({
+            url: wm.url + `${lat},${long}`,
+            dataType: 'jsonp'
+        })
+    location.hash = ''  
+    })
+}
+
+function geoAjax(query){
+    var geoUrl = "https://maps.googleapis.com/maps/api/geocode/json?address="
+    
+    return $.ajax({url: geoUrl + query})
+
+}
 
 
 function userQuery(event) {
     if (event.keyCode === 13) {
         var inputEl = event.target,
-            query = inputEl.value,
-            latLong = query.split(',')
+            query = inputEl.value
 
-        lat = latLong[0]
-        console.log(lat)
-        long = latLong[1]
-        location.hash = `${lat},${long}`
+        location.hash = `search/${query}`
         event.target.value = ''
     }
 }
-
 $('#searchBar')[0].addEventListener('keypress', userQuery)
-
+$('#currentLoc')[0].addEventListener('click', getLatLong)
 
 var WeatherModel = Backbone.Model.extend({
 
-    url: `https://api.forecast.io/forecast/b79c4066ee5c0ab13cf70ab690dff82f/${lat},${long}`,
+    url: "https://api.forecast.io/forecast/b79c4066ee5c0ab13cf70ab690dff82f/",
     parse: function(responseData) {
         return responseData
     }
@@ -133,7 +148,7 @@ var WeatherView = Backbone.View.extend({
         this.$el.html(
             `<div id="weatherContainer">
 				<div id="currentContainer">
-					<h1> Current Weather </h1>
+					<h1> Current Weather in ${place} </h1>
 					<ul id="currently">${this.getCurrently()}</ul>
 				</div>
 				<div id="dailyContainer">
@@ -156,9 +171,11 @@ var wv = new WeatherView({model: wm})
 var WeatherRouter = Backbone.Router.extend({
 
     routes: {
-        ':query': 'showResults',
+        'search/:query': 'showResults',
         '*anyroute': 'showDefault'
     },
+
+
 
     initialize: function() {
         Backbone.history.start()
@@ -167,15 +184,26 @@ var WeatherRouter = Backbone.Router.extend({
     showDefault: function() {
         console.log('running show default')
         wm.fetch({
-            dataType: 'jsonp',
-        })
+            url: wm.url + `${lat},${long}`,
+            dataType: 'jsonp'
+        })           
     },
 
     showResults: function(query){
         console.log('responding to hash change')
-        wm.fetch({
-            dataType: 'jsonp',
-        })
+
+        geoAjax(query).done(function(data){
+
+            var loc = data.results[0]
+            lat = loc.geometry.location.lat
+            long = loc.geometry.location.lng
+            place = loc.formatted_address
+
+            wm.fetch({
+                url: wm.url + `${lat},${long}`,
+                dataType: 'jsonp',
+            })
+        })  
     }
 })
 
